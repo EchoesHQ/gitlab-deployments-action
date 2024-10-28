@@ -22,10 +22,32 @@ while getopts ":t:v:d:c:s:i:" opt; do
         v) version=$(trim "${OPTARG}")
         ;;
         d)
-        mapfile -t deliverables < <(trim "${OPTARG}")
+            deliverables=()
+
+            if [[ "${OPTARG}" =~ ^([^,]+,)+[^,]+$ ]]; then # Support comma separated list of deliverables
+                IFS=',' read -r -a raw_deliverables <<< "${OPTARG}"
+            else
+                mapfile -t raw_deliverables < <(echo "${OPTARG}") # Support Newline-separated list of deliverables
+            fi
+
+            for deliverable in "${raw_deliverables[@]}"; do
+                trimmed_deliverable=$(trim "$deliverable")
+                deliverables+=("$trimmed_deliverable")
+            done
         ;;
         c)
-        mapfile -t commits < <(trim "${OPTARG}")
+            commits=()
+
+            if [[ "${OPTARG}" =~ ^([^,]+,)+[^,]+$ ]]; then # Support comma separated list of commits
+                IFS=',' read -r -a raw_commits <<< "${OPTARG}"
+            else
+                mapfile -t raw_commits < <(echo "${OPTARG}")  # Support Newline-separated list of commits
+            fi
+
+            for commit in "${raw_commits[@]}"; do
+                trimmed_commit=$(trim "$commit")
+                commits+=("$trimmed_commit")
+            done
         ;;
         s) status=$(trim "${OPTARG}")
         ;;
